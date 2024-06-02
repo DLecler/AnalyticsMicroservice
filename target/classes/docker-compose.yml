@@ -1,0 +1,45 @@
+volumes:
+  pg_data: {}
+  pgadmin:
+
+services:
+  postgres_dean_office:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: s20g;_2-r505t8
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres", "--quiet" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    volumes:
+#      - ./postgresql/dumps:/code/dumps
+      - ./postgresql/dumps/dean_office.sql:/docker-entrypoint-initdb.d/init.sql
+      - pg_data:/var/lib/postgresql/data
+    ports:
+        - "5433:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  pgadmin_dean_office:
+    container_name: pgadmin_container_dean_office
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
